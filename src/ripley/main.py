@@ -172,7 +172,7 @@ class RipleyScrapper:
             seller = Selector(product).get('.product-information-cell a').get_attribute('innerHTML')
             return seller
         except Exception:
-            return EMPTY_FIELD
+            return 'Ripley'
     
     def get_product_ruc(self, product: WebElement):
         return EMPTY_FIELD
