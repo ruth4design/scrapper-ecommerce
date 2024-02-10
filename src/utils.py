@@ -55,14 +55,20 @@ class Color(Enum):
     GREEN = "green"
     RESET = "reset"
     VIOLET = "violet"
+    YELLOW = "yellow"
 
 class ColorPrint:
+    color = Color
+    def __init__(self):
+        self.color = Color
+
     COLORS = {
         Color.BLACK: "\033[30m",
         Color.RED: "\033[31m",
         Color.GREEN: "\033[32m",
         Color.RESET: "\033[0m",
-        Color.VIOLET: "\033[35m"
+        Color.VIOLET: "\033[35m",
+        Color.YELLOW: "\033[33m"
     }
 
     @staticmethod
@@ -79,9 +85,25 @@ class ColorPrint:
 
         color_code = ColorPrint.COLORS.get(color, "")
         reset_code = ColorPrint.COLORS[Color.RESET]
+        timer = 0
 
         while self.loading:
-            print(f"{color_code}{text} {loader_chars[idx % len(loader_chars)]}{reset_code}", end=print_end)
+            timer = round(timer + 0.1, 2)
+            # round to 2 decimal places form 1.232323 to 1.23
+
+            timer_print = None
+
+            if timer < 10:
+                timer_print = f"0{timer}seg"
+            elif timer < 60:
+                timer_print = f"{timer}seg"
+            elif timer < 3600:
+                
+                timer_print = f"{round(timer/60, 2)}min"
+            else:
+                timer_print = f"{round(timer/3600, 2)}hrs"
+            # print(f"{color_code}{text} {loader_chars[idx % len(loader_chars)]}{reset_code}", end=print_end)
+            print(f"{color_code}{text} {loader_chars[idx % len(loader_chars)]}: Time lapsed aprox {timer_print} {reset_code}", end=print_end)
             time.sleep(0.1)
             idx += 1
         print(f"{color_code}{text} done{reset_code}", end="\n")

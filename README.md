@@ -73,3 +73,9 @@ for paraiso
 ```bash
 ./execute.bat --paraiso
 ```
+
+for plaza vea
+
+```bash
+./execute.bat --plazavea
+```
