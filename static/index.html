@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Productos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            max-width: 600px;
+            margin: 15px auto 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="file"],
+        .form-group button {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid #118ab2;
+            background-color: #f4f4f4;
+            box-sizing: border-box;
+
+        }
+
+        .form-group button {
+            background-color: #06d6a0;
+            color: black;
+            text-transform: capitalize;
+            font-weight: bold;
+            cursor: pointer;
+            padding: .75rem;
+
+            transition: all 0.3s ease;
+        }
+
+        .form-group button:hover {
+            background-color: #06b481;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        hr {
+            margin: 20px 0;
+
+        }
+
+        .form-group .remove-button {
+            color: #fff;
+            background-color: #ef476f;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 50%;
+            display: block;
+            margin: .5rem auto;
+        }
+
+        .form-group .remove-button:hover {
+            background-color: #d73c5e;
+        }
+
+        #download a {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            padding: 10px;
+            background-color: #06d6a0;
+            color: black;
+            text-transform: capitalize;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Cargar Archivos CSV</h2>
+        <form id="fileUploadForm">
+            <div class="form-group">
+                <label for="fileUpload">Selecciona archivos CSV para cargar:</label>
+                <input type="file" id="fileUpload" name="files" multiple>
+            </div>
+            <div class="form-group">
+                <button type="button" id="addMoreFiles">+ archivos</button>
+            </div>
+            <hr>
+            <div class="form-group">
+                <button type="submit" id="uploadButton">Cargar Archivos</button>
+            </div>
+        </form>
+
+        <!-- <h2>Buscar Productos</h2>
+        <div class="form-group">
+            <label for="searchQuery">Consulta de Búsqueda:</label>
+            <input type="text" id="searchQuery">
+        </div> -->
+        <!-- <div class="form-group">
+            <button id="searchButton">Buscar</button>
+        </div> -->
+        <div class="results" id="resultsTable"></div>
+        <div id="download"></div>
+    </div>
+
+    <script>
+        document.getElementById('addMoreFiles').addEventListener('click', function () {
+            const newFormGroup = document.createElement('div');
+            newFormGroup.className = 'form-group';
+
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.name = 'files';
+            newInput.multiple = true;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.textContent = 'Remove';
+            removeButton.className = 'remove-button';
+            removeButton.onclick = function () {
+                newFormGroup.remove();
+            };
+
+            newFormGroup.appendChild(newInput);
+            newFormGroup.appendChild(removeButton);
+
+            document.getElementById('fileUploadForm').insertBefore(newFormGroup, this.parentNode);
+        });
+
+        document.getElementById('fileUploadForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const button = document.getElementById('uploadButton');
+            button.disabled = true;
+            button.textContent = 'Cargando...';
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const result = await response.json();
+                button.disabled = false;
+                button.textContent = 'Cargar Archivos';
+                alert('Archivos subidos exitosamente');
+                const downloadContainer = document.querySelector('#download');
+                downloadContainer.innerHTML = `<a href="/group">Comenzar a procesar los archivos subidos</a>`;
+
+                console.log(result);
+            } catch (error) {
+                console.error('Error al cargar archivos:', error);
+            }
+        });
+
+        // document.getElementById('searchButton').addEventListener('click', async function () {
+        //     const query = document.getElementById('searchQuery').value;
+        //     let downloadContainer = document.querySelector('#download')
+
+        //     try {
+        //         const response = await fetch(`/search?query=${query}`);
+
+        //         const results = await response.json();
+
+        //         downloadContainer.innerHTML = `<a href="/download/${query}">Descargar Resultados</a>`;
+
+        //         updateResultsTable(results);
+        //     } catch (error) {
+        //         console.error('Error al realizar la búsqueda:', error);
+        //     }
+        // });
+
+        function updateResultsTable(results) {
+            let tableHtml = `<table>
+                                <tr>
+                                    <th>Competidor</th>
+                                    <th>Categoría</th>
+                                    <th>Vendedor</th>
+                                    <th>Descripción</th>
+                                    <th>Marca</th>
+                                    <th>Precio Regular</th>
+                                    <th>Página Web</th>
+                                </tr>`;
+            results.forEach(result => {
+                tableHtml += `<tr>
+                                <td>${result.Competidor}</td>
+                                <td>${result.Categoría}</td>
+                                <td>${result.Seller ?? result.Competidor}</td>
+                                <td>${result.Descripción}</td>
+                                <td>${result.Marca}</td>
+                                <td>${result['Precio Regular']}</td>
+                                <td><a href="${result['Página Web']}">Ver Producto</a></td>
+                              </tr>`;
+            });
+            tableHtml += `</table>`;
+            document.getElementById('resultsTable').innerHTML = tableHtml;
+        }
+    </script>
+</body>
+
+</html>

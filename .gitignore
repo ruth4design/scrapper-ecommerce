@@ -2,4 +2,7 @@
 /output
 /venv
 
+**/*.csv
+**/*.xlsx
+**/*.docx
 **/__pycache__/

@@ -29,13 +29,13 @@ class RipleyScrapper:
 
     def __enter__(self):
         return self
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.driver.quit()
-    
-    def get_data(self):
+
+    def get_data(self, printer: ColorPrint):
         csv_headers = [
-           
+
             'Competidor',
             'Categoría',
             'Subcategoría',
@@ -67,14 +67,14 @@ class RipleyScrapper:
             'Tiene Stock',
             'Modelo',
         ]
-        file_name = f'./output/ripley/paraiso-peru-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
+        file_name = f'./output/ripley/ripley-peru-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
         csv_file = CreateCSV(filename=file_name, headers=csv_headers)
-        self.scrape_data_ripley(csv_file)
-        
+        self.scrape_data_ripley(csv_file, printer=printer)
+
         csv_file.close()
 
-    
-    
+
+
     def get_hamburger_menu(self):
         hamburger_menu = Selector(self.driver).get('.menu-button')
         # wait until the hamburger menu is clickable
@@ -82,7 +82,7 @@ class RipleyScrapper:
             EC.element_to_be_clickable((By.CSS_SELECTOR, '.menu-button'))
         )
         return hamburger_menu
-    
+
     def check_sidebar_open(self):
         try:
             hamburger_menu = self.get_hamburger_menu()
@@ -92,10 +92,10 @@ class RipleyScrapper:
             return None
     def get_product_breadcrumb(self, product: WebElement):
         return [breadcrumb.text for breadcrumb in product.find_elements(By.CSS_SELECTOR, '.breadcrumbs a span') ]
-     
+
     def get_value_in_table(self, table: WebElement, label: str):
         try:
-            # Encuentra todas las filas en el elemento del 
+            # Encuentra todas las filas en el elemento del
             rows = table.find_elements(By.CSS_SELECTOR, "tr")
 
             # Itera sobre cada fila para buscar la etiqueta
@@ -116,25 +116,25 @@ class RipleyScrapper:
 
     def get_product_competitor(self, product: WebElement):
         return 'Ripley'
-    
+
     def get_product_category(self, product: WebElement):
         try:
             return self.get_product_breadcrumb(product)[0]
         except Exception:
             return EMPTY_FIELD
-    
+
     def get_product_subcategory(self, product: WebElement):
         try:
             return self.get_product_breadcrumb(product)[1]
         except Exception:
             return EMPTY_FIELD
-    
+
     def get_product_section(self, product: WebElement):
         try:
             return self.get_product_breadcrumb(product)[2]
         except Exception:
             return EMPTY_FIELD
-    
+
     def get_product_code_grouped(self, product: WebDriver):
         try:
             last_path = product.current_url.split('/')[-1].split('?')[0].split('-')[-1]
@@ -152,7 +152,7 @@ class RipleyScrapper:
             return EMPTY_FIELD
     def get_product_ean(self, product: WebElement):
         return EMPTY_FIELD
-    
+
     def get_product_description(self, product: WebElement):
         try:
             return Selector(product).get('.product-header h1').get_attribute('innerHTML')
@@ -166,17 +166,17 @@ class RipleyScrapper:
             return EMPTY_FIELD
     def get_product_um(self, product: WebElement):
         return 'UN'
-    
+
     def get_product_seller(self, product: WebElement):
         try:
             seller = Selector(product).get('.product-information-cell a').get_attribute('innerHTML')
             return seller
         except Exception:
             return 'Ripley'
-    
+
     def get_product_ruc(self, product: WebElement):
         return EMPTY_FIELD
-    
+
     def get_product_regular_price(self, product: WebElement):
         try:
             return product.find_element(By.CSS_SELECTOR, '.product-normal-price .product-price').get_attribute('innerHTML')
@@ -187,19 +187,19 @@ class RipleyScrapper:
             return product.find_element(By.CSS_SELECTOR, '[class*=product-internet] .product-price').get_attribute('innerHTML')
         except Exception:
             return EMPTY_FIELD
-        
+
     def get_product_card_price(self, product: WebElement):
         try:
             return product.find_element(By.CSS_SELECTOR, '.product-price-container.product-ripley-price .product-price').get_attribute('textContent').strip()
         except Exception:
             return EMPTY_FIELD
-    
+
     def get_product_page(self, product: WebElement):
         try:
             return product.get_attribute('href')
         except Exception:
             return EMPTY_FIELD
-    
+
     def select_location(self, driver_product: WebElement):
         try:
             select =  driver_product.find_element(By.CSS_SELECTOR, '.Select-control')
@@ -246,8 +246,8 @@ class RipleyScrapper:
             if char.isdigit() or char == '.':
                 number += char
         return number
-    
-    
+
+
 
     def get_product_shipping_cost(self, product: WebElement, key: str = 'Express'):
         try:
@@ -257,12 +257,12 @@ class RipleyScrapper:
                 string = express_cost.split(',')[0]
                 return self.get_number_from_string(string)
             return EMPTY_FIELD
-        
+
             #Array of  <div class="pickup-and-delivery__options"><span class="pickup-and-delivery__options__name">Express</span><span class="pickup-and-delivery__options__details">: a partir de S/ 12, para el 3 de febrero</span></div>
         except Exception as e:
             print(f'No se pudo obtener el costo de envío {e}')
             return EMPTY_FIELD
-    
+
     def format_date(self, date: str):
 
         months = {
@@ -291,26 +291,26 @@ class RipleyScrapper:
         # return a valid date format ejm: 2022-02-05
         new_valid_date = datetime.now().strftime('%Y') + '-' + month + '-' + day
         return new_valid_date
-    
 
-    
+
+
 
 
     def get_product_shipping_lead_time(self, product: WebElement, key: str = 'Express'):
-        
+
         try:
             all_details = product.find_elements(By.CSS_SELECTOR, '.pickup-and-delivery__options')
             express_lead_time = self.get_by_key_cost(all_details, key=key)
             if express_lead_time != EMPTY_FIELD:
-                date_info =  express_lead_time.split(',')[1] 
+                date_info =  express_lead_time.split(',')[1]
                 valid_date = self.format_date(date_info)
-            
+
                 return valid_date
 
             return EMPTY_FIELD
         except Exception:
             return EMPTY_FIELD
-    
+
     def get_days_until_date(self, date: str):
         try:
             date = datetime.strptime(date, '%Y-%m-%d')
@@ -321,7 +321,7 @@ class RipleyScrapper:
             if difference.seconds > 0:
                 flat_days += 1
             return flat_days
-        
+
         except Exception:
             return EMPTY_FIELD
 
@@ -339,10 +339,10 @@ class RipleyScrapper:
                 return 'Vendedor destacado'
         except Exception:
             return EMPTY_FIELD
-    
+
     def get_product_stock(self, product: WebElement):
         return EMPTY_FIELD
-    
+
     def get_product_has_stock(self, product: WebElement):
 
         try:
@@ -353,7 +353,7 @@ class RipleyScrapper:
         except Exception:
 
             return 'No'
-    
+
     def get_product_model(self, product: WebElement):
 
         try:
@@ -373,8 +373,8 @@ class RipleyScrapper:
         except Exception as e:
             print(f'No se pudo obtener la información de envío {e}')
             return 'No disponible'
-  
-        
+
+
     def scrape_product(self, product_url, csv_file: CreateCSV):
 
         try:
@@ -382,7 +382,7 @@ class RipleyScrapper:
             driver.get(product_url)
             self.select_location(driver)
             product_obj = {}
-            
+
             product_obj['Competidor'] = self.get_product_competitor(driver)
             product_obj['Categoría'] = self.get_product_category(driver)
             product_obj['Subcategoría'] = self.get_product_subcategory(driver)
@@ -416,21 +416,21 @@ class RipleyScrapper:
 
             self.counter += 1
             csv_file.write(product_obj)
-            
+
             # remove driver from memory
             driver.quit()
 
-            ColorPrint.print(f"Scraped {self.counter} products", Color.GREEN)
+            ColorPrint.print(f"Scraped {self.counter} products {product_url}", Color.GREEN)
         except Exception as e:
             print(f"An error occurred while processing product link {product_url}: {e}")
             return None
-        
-    def scrape_category(self, category_url, csv_file):
+
+    def scrape_category_per_page(self, category_url, csv_file):
         try:
             driver = init_driver()
-            
+
             driver.get(category_url)
-           
+
             products = Selector(driver).get_all('.catalog-page__product-grid--with-sidebar .catalog-container .catalog-product-item a')
 
             product_urls = [product.get_attribute('href') for product in products]
@@ -444,8 +444,8 @@ class RipleyScrapper:
 
                 if next_page.endswith('#'):
                     return None
-                return self.scrape_category(next_page, csv_file)
-                
+                return self.scrape_category_per_page(next_page, csv_file)
+
             except Exception:
                 pass
 
@@ -458,28 +458,31 @@ class RipleyScrapper:
         except Exception :
             pass
 
-    def scrape_data_ripley(self, csv_file):
+
+    def select_category(self, categories_url):
+        for i, category in enumerate(categories_url):
+            name_category = category.split('/')[-1].split('?')[0]
+            print(f'{i + 1}. {name_category}')
+        category = int(input('Seleccione una categoría: '))
+        return categories_url[category - 1]
+
+    def scrape_data_ripley(self, csv_file, printer: ColorPrint):
         self.driver.get(self.url)
         hamburger_menu = self.get_hamburger_menu()
         # wait until the hamburger menu is clickable
-       
+
         hamburger_menu.click()
         navbar_items = self.driver.find_elements(By.CSS_SELECTOR, '.tree-node-items > a')
-        
+
+        printer.stop_loader("==========================")
         categories_url = []
         for item in navbar_items:
             categories_url.append(item.get_attribute('href'))
+        # select category in terminal input
+        category = self.select_category(categories_url)
+        printer.start_loader(text=f"Searching for data Ripley for category: {category}", color=Color.GREEN)
 
-        with ThreadPoolExecutor(max_workers=self.MAX_THREADS_CATEGORY) as executor:
-            for category_url in categories_url:
-                executor.submit(self.scrape_category, category_url, csv_file)
-
-        
-        
-    
-    
-
-
-
-
-    
+        self.scrape_category_per_page(category, csv_file)
+        # with ThreadPoolExecutor(max_workers=self.MAX_THREADS_CATEGORY) as executor:
+        #     for category_url in categories_url:
+        #         executor.submit(self.scrape_category_per_page, category_url, csv_file)

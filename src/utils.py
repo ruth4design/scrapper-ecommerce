@@ -41,7 +41,7 @@ class CreateCSV:
 # for item in data:
 #     csv_file.write(item)
 # csv_file.close()
-        
+
 
 
 def purify_str(text, replace_char=','):
@@ -98,7 +98,7 @@ class ColorPrint:
             elif timer < 60:
                 timer_print = f"{timer}seg"
             elif timer < 3600:
-                
+
                 timer_print = f"{round(timer/60, 2)}min"
             else:
                 timer_print = f"{round(timer/3600, 2)}hrs"
@@ -106,21 +106,21 @@ class ColorPrint:
             print(f"{color_code}{text} {loader_chars[idx % len(loader_chars)]}: Time lapsed aprox {timer_print} {reset_code}", end=print_end)
             time.sleep(0.1)
             idx += 1
-        print(f"{color_code}{text} done{reset_code}", end="\n")
+        message = self.message if self.message else f"{color_code}{text} done{reset_code} in {timer_print} {reset_code}"
+        print(message)
 
     def __init__(self):
         self.loading = False
         self.thread = None
+        self.message = None
 
     def start_loader(self, text: str, color: Color) -> None:
         self.loading = True
         self.thread = threading.Thread(target=self.__animate_loader, args=(text, color))
         self.thread.start()
 
-    def stop_loader(self) -> None:
+    def stop_loader(self, message: str="") -> None:
         if self.loading:
             self.loading = False
+            self.message = message
             self.thread.join()
-
-
-

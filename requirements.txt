@@ -1,2 +1,9 @@
 selenium
 requests
+pandas
+pyarrow
+scikit-learn
+nltk
+fastapi
+python-multipart
+uvicorn[standard]
