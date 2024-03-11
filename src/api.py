@@ -28,13 +28,12 @@ class ScrapperOfApi:
 
     def try_get_page(self):
         url = f'{self.url}/api/catalog_system/pub/category/tree/3'
-        self.logger.print(f'Getting categories from {url}', ColorPrint.color.RED)
         response = self.session.get(url, timeout=self.timeout)
         response_json = response.json()
         # return self.remove_duplicates()÷
         futures = []
         for section in response_json:
-            if len(section['children']) == 0 and self.tree_depth == 2:
+            if self.tree_depth == 2:
                 category_id = f'C:/{section["id"]}/'
                 category_path = [section['name']]
                 futures.append(self.executor.submit(self.get_products_by_category, category_id, category_path))
@@ -74,7 +73,6 @@ class ScrapperOfApi:
         directory_csv = os.path.abspath(absolute_path)
         print(directory_csv,absolute_path)
         cvs = pd.read_csv(directory_csv)
-
         cvs.drop_duplicates(subset=['Descripción'], keep='first', inplace=True)
 
         cvs.to_csv(directory_csv, index=False)
@@ -88,6 +86,7 @@ class ScrapperOfApi:
                     futures.append(executor.submit(self.fetch_products, category, page))
                 for future in as_completed(futures):
                     product_data, page = future.result()
+                    
                     if product_data:
                         self.process_product_data(product_data, category_path)
                     else:
@@ -137,6 +136,7 @@ class ScrapperOfApi:
             self.save_to_excel(product)
 
     def save_to_excel(self, product):
-        self.csv.write(self.parser.parse(product))
+        product_parsed = self.parser.parse(product)
+        self.csv.write(product_parsed)
 
 # Assuming utils.CreateCSV, utils.ColorPrint, utils.Color, and parser_data

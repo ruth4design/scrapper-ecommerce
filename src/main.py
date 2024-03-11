@@ -46,11 +46,8 @@ vector          [v]
         data = ripley_scrapper.get_data(printer=printer)
     if args.paraiso:
         printer.start_loader(text="Searching for data Paraiso ", color=Color.GREEN)
-        # paraiso_scrapper = ParaisoScrapper(url='https://www.paraiso-peru.com/', timer_for_scroll=10.5, threads_for_navbar=1, threads_for_product=5)
-        # data = paraiso_scrapper.get_data()
         url = 'https://www.paraiso-peru.com'
         file_name = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),f'../output//paraiso/paraiso-peru-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'))
-        scrapper = ScrapperOfApi(url=url, headers_csv=csv_paraiso_headers, csv_name=file_name, tree_depth=2, parser=ParserParaiso(), threads=4,)
-        scrapper.execute()
+        scrapper = ScrapperOfApi(url=url, headers_csv=csv_paraiso_headers, csv_name=file_name, tree_depth=2, parser=ParserParaiso(), threads=5)
 
     printer.stop_loader()
