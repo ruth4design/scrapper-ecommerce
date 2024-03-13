@@ -72,7 +72,7 @@ class ScrapperOfApi:
         # Devuelve el path absoluto
         directory_csv = os.path.abspath(absolute_path)
         print(directory_csv,absolute_path)
-        cvs = pd.read_csv(directory_csv)
+        cvs = pd.read_csv(directory_csv, delimiter=',', error_bad_lines=False, encoding='utf-8')
         cvs.drop_duplicates(subset=['Descripción'], keep='first', inplace=True)
 
         cvs.to_csv(directory_csv, index=False)

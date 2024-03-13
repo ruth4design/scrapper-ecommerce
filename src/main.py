@@ -39,7 +39,7 @@ vector          [v]
         filename = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),f'../output/plazavea/plaza-vea-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'))
        
 
-        plazavea_scrapper = ScrapperOfApi(headers_csv=headers_plaza_vea_csv, csv_name=filename, threads=5)
+        plazavea_scrapper = ScrapperOfApi(headers_csv=headers_plaza_vea_csv, csv_name=filename, threads=2)
     if args.ripley:
         printer.start_loader(text="Getting categories for data Ripley ", color=Color.GREEN)
         ripley_scrapper = RipleyScrapper(url='https://simple.ripley.com.pe/')
