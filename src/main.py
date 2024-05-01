@@ -2,7 +2,7 @@ import argparse
 import os
 from headers import csv_paraiso_headers, headers_plaza_vea_csv
 from paraiso.main import ParaisoScrapper
-from ripley.main import RipleyScrapper
+from ripley.new import RipleyScrapper
 from utils import ColorPrint, Color
 from grouper_custom_iteration import main as main_custom
 from grouper_vectorized import main as main

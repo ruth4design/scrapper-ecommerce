@@ -7,18 +7,31 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def init_driver(options: Options = None):
-    options = Options()
+def init_driver(options: Options = None, disable_image=True, disable_js=False):
+    # options = Options()
+    if options is None:
+        options = Options()
+    else:
+        options = options
     options.add_argument('--headless=new')
-    prefs = {
-        "profile.managed_default_content_settings.images": 2
-    }
+    # prefs = {
+    #     "profile.managed_default_content_settings.images": 2,
+        
+    # }
+    prefs = {}
+    if disable_image:
+        prefs["profile.managed_default_content_settings.images"] = 2
+    if disable_js:
+        prefs["profile.managed_default_content_settings.javascript"] = 2
     options.add_experimental_option("prefs", prefs)
     # use agent to avoid bot detection
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
+
+    #
+
     options.add_argument("start-maximized")
     driver = webdriver.Chrome(options=options)
     return driver
