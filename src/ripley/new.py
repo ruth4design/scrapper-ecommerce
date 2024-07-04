@@ -29,7 +29,7 @@ class RipleyScrapper:
         self.categories = []
         self.MAX_THREADS_CATEGORY = MAX_THREADS_CATEGORY
         self.MAX_THREADS_PRODUCT = MAX_THREADS_PRODUCT
-
+        self.csv_file = None
 
     def __enter__(self):
         return self
@@ -71,10 +71,11 @@ class RipleyScrapper:
             'Modelo',
         ]
         file_name = f'./output/ripley/ripley-peru-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
-        csv_file = CreateCSV(filename=file_name, headers=csv_headers)
-        self.scrape_data_ripley(csv_file, printer=printer)
-
-        csv_file.close()
+        self.csv_file = CreateCSV(filename=file_name, headers=csv_headers)
+        url_slug = self.scrape_data_ripley(self.csv_file, printer=printer)
+        category = url_slug.replace('/', '_').replace('?page=', '-')
+        self.csv_file.close()
+        self.csv_file.rename_partial('ripley-peru','ripley-'+category)
 
 
 
@@ -419,12 +420,23 @@ class RipleyScrapper:
 
             preloaded_state_obj = driver.execute_script('return window.__PRELOADED_STATE__')
 
+            # check if exists key products in preloaded_state_obj
+            if 'products' not in preloaded_state_obj:
+                return None
+
             products = preloaded_state_obj['products']
 
             if len(self.categories) == 0:
                 self.categories = self.flat_map_category(preloaded_state_obj['categories']['normal']) 
             menu = preloaded_state_obj['menu']['branch']
-            for product in preloaded_state_obj['products']:
+
+
+
+
+
+            
+
+            for product in products:
                 product_obj = {}
 
                 product_obj['Competidor'] = "Ripley"
@@ -561,7 +573,10 @@ class RipleyScrapper:
         printer.start_loader(text=f"Searching for data Ripley for category: {category}", color=Color.GREEN)
 
 
+
         self.scrape_category_per_page(self.url+category_url, csv_file)
+
+        return category_url
         # with ThreadPoolExecutor(max_workers=self.MAX_THREADS_CATEGORY) as executor:
         #     for category_url in categories_url:
         #         executor.submit(self.scrape_category_per_page, category_url, csv_file)

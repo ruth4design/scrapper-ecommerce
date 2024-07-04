@@ -27,11 +27,24 @@ class CreateCSV:
     def close(self):
         self.file.close()
 
+    def rename(self, new_name):
+        self.file.close()
+        os.rename(self.file.name, new_name)
+
+    def rename_partial(self, matcher, new_name):
+        self.file.close()
+        new_name = self.file.name.replace(matcher, new_name)
+        os.rename(self.file.name, new_name)
+        
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
+
+
+    
 
 
 
