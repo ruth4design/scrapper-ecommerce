@@ -52,3 +52,37 @@ csv_paraiso_headers = [
     'Tiene Stock',
     'Tamaño'
 ]
+
+
+csv_headers_falabella = [
+            'Competidor',
+            'Categoría',
+            'Subcategoría',
+            'Sección',
+            'Código Web Agrupado',
+            'Código Web Individual',
+            'EAN',
+            'Descripción',
+            'Marca',
+            'UM',
+            'Seller',
+            'RUC',
+            'Precio Regular',
+            'Precio Promo',
+            'Precio Tarjeta',
+            'Página Web',
+            'Delivery disponible',
+            'Recojo en tienda',
+            'Retiro cercano',
+            'Shipping Cost Express',
+            'Shipping Lead Time Express',
+            'Delivery Time Express',
+            'Shipping Cost Normal',
+            'Shipping Lead Time Normal',
+            'Delivery Time Normal',
+            'Tag Best Seller',
+            'All Tags',
+            'Stock',
+            'Tiene Stock',
+            'Modelo',
+        ]

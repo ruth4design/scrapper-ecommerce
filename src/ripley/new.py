@@ -39,7 +39,6 @@ class RipleyScrapper:
 
     def get_data(self, printer: ColorPrint):
         csv_headers = [
-
             'Competidor',
             'Categoría',
             'Subcategoría',
@@ -506,8 +505,8 @@ class RipleyScrapper:
 
     def select_category(self, categories_url):
         for i, category in enumerate(categories_url):
-            name_category = category.split('/')[-1].split('?')[0]
-            print(f'{i + 1}. {name_category}')
+            # name_category = category.split('/')[-1].split('?')[0]
+            print(f'{i + 1}. {category['slug']}')
         category = int(input('Seleccione una categoría: '))
 
         initial_page = input('Ingrese la página inicial(O preciones enter para omitir): ')
@@ -516,28 +515,43 @@ class RipleyScrapper:
         else:
             initial_page = int(initial_page)
         
-        return categories_url[category - 1] + f'&page={initial_page}'
+        return categories_url[category - 1]['slug'] + f'?page={initial_page}'
 
     def scrape_data_ripley(self, csv_file, printer: ColorPrint):
         self.driver.get(self.url)
-        hamburger_menu = self.get_hamburger_menu()
-        # wait until the hamburger menu is clickable
 
-        hamburger_menu.click()
-        navbar_items = self.driver.find_elements(By.CSS_SELECTOR, '.tree-node-items > a')
+        
+        scripts = Selector(driver=self.driver).get_all('script[type="text/javascript"]')
 
-        printer.stop_loader("==========================")
-        categories_url = []
-        for item in navbar_items:
-            categories_url.append(item.get_attribute('href'))
+        # get the script that has the window.__PRELOADED_STATE__ variable
+
+        script = [script for script in scripts if 'window.__PRELOADED_STATE__' in script.get_attribute('innerHTML')][0]
+        
+        self.driver.execute_script(script.get_attribute('innerHTML'))
+
+        preloaded_state_obj = self.driver.execute_script('return window.__PRELOADED_STATE__')
+
+        categories_url = preloaded_state_obj['categories']['normal']
+        # print(categories_url)
+
+        # hamburger_menu = self.get_hamburger_menu()
+        # # wait until the hamburger menu is clickable
+
+        # hamburger_menu.click()
+        # navbar_items = self.driver.find_elements(By.CSS_SELECTOR, '.tree-node-items > a')
+
+        # printer.stop_loader("==========================")
+        # categories_url = []
+        # for item in categories_url:
+        #     categories_url.append(item.get_attribute('href'))
         # select category in terminal input
         category_url = self.select_category(categories_url)
+        print(category_url)
         category = category_url.split('/')[-1].split('?')[0]
         printer.start_loader(text=f"Searching for data Ripley for category: {category}", color=Color.GREEN)
 
 
-
-        self.scrape_category_per_page(category_url, csv_file)
+        self.scrape_category_per_page(self.url+category_url, csv_file)
         # with ThreadPoolExecutor(max_workers=self.MAX_THREADS_CATEGORY) as executor:
         #     for category_url in categories_url:
         #         executor.submit(self.scrape_category_per_page, category_url, csv_file)

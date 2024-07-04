@@ -3,6 +3,7 @@ import os
 from headers import csv_paraiso_headers, headers_plaza_vea_csv
 from paraiso.main import ParaisoScrapper
 from ripley.new import RipleyScrapper
+from falabella.main import FalaBellaScrapper
 from utils import ColorPrint, Color
 from grouper_custom_iteration import main as main_custom
 from grouper_vectorized import main as main
@@ -16,6 +17,8 @@ if __name__ == "__main__":
     parser.add_argument('--ripley', action='store_true', help='Use the Ripley scrapper')
     parser.add_argument('--paraiso', action='store_true', help='Use the Paraiso scrapper')
     parser.add_argument('--plazavea', action='store_true', help='Use the Plazavea scrapper')
+    parser.add_argument('--oechsle', action='store_true', help='Use the Oechsle scrapper')
+    parser.add_argument('--falabella', action='store_true', help='Use the Falabella scrapper')
     parser.add_argument('--group', action='store_true', help='Use the group function')
     args = parser.parse_args()
     printer = ColorPrint()
@@ -40,14 +43,24 @@ vector          [v]
        
 
         plazavea_scrapper = ScrapperOfApi(headers_csv=headers_plaza_vea_csv, csv_name=filename, threads=2)
+
+    if args.oechsle:
+        printer.start_loader(text="Searching for data oechsle ", color=Color.GREEN)
+        
+        filename = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),f'../output/oechsle/oechsle-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'))
+       
+        oechsle_scrapper = ScrapperOfApi(url='https://www.oechsle.pe',headers_csv=headers_plaza_vea_csv, csv_name=filename, threads=3, parser=ParserPlazaVea(name='Oechsle'))
     if args.ripley:
-        printer.start_loader(text="Getting categories for data Ripley ", color=Color.GREEN)
-        ripley_scrapper = RipleyScrapper(url='https://simple.ripley.com.pe/')
-        data = ripley_scrapper.get_data(printer=printer)
+        # printer.start_loader(text="Getting categories for data Ripley ", color=Color.GREEN)
+        scrapper = RipleyScrapper(url='https://simple.ripley.com.pe/')
+        data = scrapper.get_data(printer=printer)
     if args.paraiso:
         printer.start_loader(text="Searching for data Paraiso ", color=Color.GREEN)
         url = 'https://www.paraiso-peru.com'
         file_name = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),f'../output//paraiso/paraiso-peru-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'))
         scrapper = ScrapperOfApi(url=url, headers_csv=csv_paraiso_headers, csv_name=file_name, tree_depth=2, parser=ParserParaiso(), threads=5)
-
+    if args.falabella:
+        printer.start_loader(text="Getting categories for data Ripley ", color=Color.GREEN)
+        scrapper = FalaBellaScrapper(url='https://www.falabella.com.pe/')
+        data = scrapper.get_data(printer=printer)
     printer.stop_loader()

@@ -3,6 +3,10 @@ from utils import ColorPrint, Color
 
 class ParserPlazaVea:
 
+#    initialize the parser
+    def __init__(self, name='Plaza Vea') -> None:
+        self.name = name
+
     def get_promotion_teaser_discount(self, product):
         for teaser in product['items'][0]['sellers'][0]['commertialOffer']['PromotionTeasers']:
             if teaser['Name'] == 'TARJETA OH - PVEA':
@@ -50,7 +54,7 @@ class ParserPlazaVea:
 
             # Try to assign values to each variable
             try:
-                competitor = 'PlazaVea'
+                competitor = self.name
             except Exception as e:
                 print(f"Error setting competitor: {e}")
 

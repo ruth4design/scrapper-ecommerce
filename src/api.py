@@ -43,7 +43,6 @@ class ScrapperOfApi:
                         for subcategory in category['children']:
                             category_id = f'C:/{section["id"]}/{category["id"]}/{subcategory["id"]}/'
                             category_path = [section['name'], category['name'], subcategory['name']]
-                            
                             futures.append(self.executor.submit(self.get_products_by_category, category_id, category_path))
                     elif self.tree_depth >= 2:
                         category_id = f'C:/{section["id"]}/{category["id"]}/'
