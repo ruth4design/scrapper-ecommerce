@@ -502,12 +502,34 @@ class RipleyScrapper:
             self.scrape_category_per_page(category_url, csv_file)
              
 
+    def print_sub_categories(self, categories, level=1):
+        for i, category in enumerate(categories):
+            print(f"{' ' * level} {i + 1}. {category['slug']}")
+            if len(category['categories']) > 0:
+                self.print_sub_categories(category['categories'], level + 1)
 
-    def select_category(self, categories_url):
-        for i, category in enumerate(categories_url):
-            # name_category = category.split('/')[-1].split('?')[0]
+    def select_category(self, categories):
+        for i, category in enumerate(categories):
+            
             print(f'{i + 1}. {category['slug']}')
+            # if len(category['categories']) > 0:
+            #     self.print_sub_categories(category['categories'])
         category = int(input('Seleccione una categoría: '))
+        category_slug = categories[category - 1]['slug']
+        select_sub_category = input('¿Desea seleccionar una subcategoría? (s/n): ')
+        if select_sub_category == 's':
+            self.print_sub_categories(categories[category - 1]['categories'])
+            sub_category = input('Seleccione una subcategoría: Ejm(1.1)')
+
+            sub_category_index_splitted_dot = sub_category.split('.') # ['1', '1']
+            
+            selected_sub_category = categories[category - 1]
+            for index in sub_category_index_splitted_dot:
+                selected_sub_category = selected_sub_category['categories'][int(index) - 1]
+                category_slug += '/' + selected_sub_category['slug']
+
+            print(category_slug)
+
 
         initial_page = input('Ingrese la página inicial(O preciones enter para omitir): ')
         if initial_page == '':
@@ -515,7 +537,7 @@ class RipleyScrapper:
         else:
             initial_page = int(initial_page)
         
-        return categories_url[category - 1]['slug'] + f'?page={initial_page}'
+        return category_slug + f'?page={initial_page}'
 
     def scrape_data_ripley(self, csv_file, printer: ColorPrint):
         self.driver.get(self.url)
@@ -532,19 +554,7 @@ class RipleyScrapper:
         preloaded_state_obj = self.driver.execute_script('return window.__PRELOADED_STATE__')
 
         categories_url = preloaded_state_obj['categories']['normal']
-        # print(categories_url)
 
-        # hamburger_menu = self.get_hamburger_menu()
-        # # wait until the hamburger menu is clickable
-
-        # hamburger_menu.click()
-        # navbar_items = self.driver.find_elements(By.CSS_SELECTOR, '.tree-node-items > a')
-
-        # printer.stop_loader("==========================")
-        # categories_url = []
-        # for item in categories_url:
-        #     categories_url.append(item.get_attribute('href'))
-        # select category in terminal input
         category_url = self.select_category(categories_url)
         print(category_url)
         category = category_url.split('/')[-1].split('?')[0]
